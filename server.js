@@ -2,6 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const uuidv4 = require('uuid')
 const storage = require('node-persist');
+const axios = require('axios').default;
+const enviaEmails = require('./enviaEmail')
+
 
 const app = express();
 app.use(bodyParser.json());
@@ -79,7 +82,36 @@ app.post('/inscricao', async (req, res) => {
 
 });
 
+app.put('/enviar/:id', async (req, res) => {
+  const { id } = req.params
+
+  await storage.init();
+  const emails = await storage.getItem("emails");
+
+  axios.get(`http://localhost:3000/noticia/${id}`).then(resp => {
+    const noticia = resp.data;
+    let count = 0;
+
+    var intervalo = setInterval(() => {
+      enviaEmails(noticia, emails[count]);
+      console.log(enviaEmails(noticia, emails[count]))
+
+      console.log("📩 Enviando email para: " + emails[count] + "...");
+      count++;
+      if (count === emails.length) {
+        clearInterval(intervalo);
+        console.log("\nEmail enviado com sucesso!✅\n");
+        res.send(emails);
+      }
+    }, 2000)
+
+  }).catch(err => {
+    res.send("Oops! Ocorreu algum problema.");
+  })
+
+})
+
 
 app.listen(3000, () => {
-  console.log(`Example app listening at http://localhost:3000 ✔`);
+  console.log(`Example app listening at http://localhost:3000 ✅`);
 })
