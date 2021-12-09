@@ -43,6 +43,43 @@ app.get('/noticia', async (req, res) => {
 
 });
 
+app.get('/noticia/:id', async (req, res) => {
+  const { id } = req.params;
+
+  await storage.init();
+
+  const noticias = await storage.getItem("noticias");
+
+  if (noticias.length === 0) {
+    res.send({ error: "Oops! Nenhuma noticia encontrada." });
+  } else {
+    const noticia = noticias.find(noticia => noticia.id === id);
+    res.send(noticia);
+  }
+
+});
+
+app.post('/inscricao', async (req, res) => {
+  const { email } = req.body;
+
+  let emails = [];
+
+  await storage.init();
+  emails = await storage.getItem("emails");
+
+  if (!emails) {
+    await storage.setItem('emails', []);
+    emails = await storage.getItem("emails");
+  }
+
+  emails.push(email);
+
+  await storage.updateItem('emails', emails);
+  res.send(emails);
+
+});
+
+
 app.listen(3000, () => {
   console.log(`Example app listening at http://localhost:3000 ✔`);
 })
