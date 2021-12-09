@@ -31,7 +31,7 @@ app.post('/noticia', async (req, res) => {
 
   await storage.updateItem('noticias', noticias);
 
-  res.send("Noticia adicionada com sucesso ✔");
+  res.send(noticias);
 
 });
 
@@ -71,7 +71,7 @@ app.post('/inscricao', async (req, res) => {
     await storage.setItem('emails', []);
     emails = await storage.getItem("emails");
   }
-
+  emails = await storage.getItem("emails");
   emails.push(email);
 
   await storage.updateItem('emails', emails);
